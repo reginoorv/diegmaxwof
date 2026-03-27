@@ -29,7 +29,7 @@ import { auth, db, storage } from "./firebase";
  * Built as a single-component React application.
  */
 
-const ADMIN_EMAIL = "tokduapuludua@gmail.com";
+const ADMIN_EMAIL = "inoterastudio@gmail.com";
 
 const TOKENS = {
   bg: "#FFFFFF",
@@ -1325,15 +1325,26 @@ function AdminPanel({ user, isAuthReady, heroData, worksData, productsData, logs
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("hero");
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
+    setLoading(true);
     try {
       await signInWithEmailAndPassword(auth, email, password);
-    } catch (err) {
-      setError("Login gagal. Periksa email dan password Anda.");
+    } catch (err: any) {
+      console.error("Login error:", err);
+      if (err.code === "auth/user-not-found" || err.code === "auth/wrong-password") {
+        setError("Email atau password salah.");
+      } else if (err.code === "auth/too-many-requests") {
+        setError("Terlalu banyak percobaan. Silakan coba lagi nanti.");
+      } else {
+        setError("Login gagal. Silakan coba lagi.");
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -1346,6 +1357,12 @@ function AdminPanel({ user, isAuthReady, heroData, worksData, productsData, logs
       <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#f5f5f5", padding: 24 }}>
         <div style={{ background: "#fff", padding: 48, borderRadius: 8, boxShadow: "0 10px 30px rgba(0,0,0,0.05)", width: "100%", maxWidth: 400 }}>
           <h1 style={{ fontSize: 24, fontWeight: 700, marginBottom: 32, textAlign: "center" }}>Admin Login</h1>
+          {user && user.email !== ADMIN_EMAIL && (
+            <div style={{ color: "#856404", fontSize: 13, marginBottom: 24, padding: 16, background: "#fff3cd", border: "1px solid #ffeeba", borderRadius: 4, lineHeight: 1.5 }}>
+              Anda masuk sebagai <strong>{user.email}</strong>, tetapi email ini tidak terdaftar sebagai Admin.
+              <button onClick={handleLogout} style={{ display: "block", marginTop: 8, background: "none", border: "none", color: "#856404", textDecoration: "underline", cursor: "pointer", padding: 0, fontWeight: 600 }}>Logout & Ganti Akun</button>
+            </div>
+          )}
           <form onSubmit={handleLogin}>
             <div style={{ marginBottom: 24 }}>
               <label style={{ display: "block", fontSize: 12, fontWeight: 600, marginBottom: 8, textTransform: "uppercase" }}>Email</label>
@@ -1356,7 +1373,23 @@ function AdminPanel({ user, isAuthReady, heroData, worksData, productsData, logs
               <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} style={{ width: "100%", padding: "12px 16px", border: `1px solid ${TOKENS.border}`, borderRadius: 4 }} required />
             </div>
             {error && <div style={{ color: "red", fontSize: 13, marginBottom: 24 }}>{error}</div>}
-            <button type="submit" style={{ width: "100%", padding: 16, background: "#111", color: "#fff", border: "none", borderRadius: 4, fontWeight: 600, cursor: "pointer" }}>Login</button>
+            <button 
+              type="submit" 
+              disabled={loading}
+              style={{ 
+                width: "100%", 
+                padding: 16, 
+                background: loading ? "#888" : "#111", 
+                color: "#fff", 
+                border: "none", 
+                borderRadius: 4, 
+                fontWeight: 600, 
+                cursor: loading ? "not-allowed" : "pointer",
+                transition: "background 0.2s"
+              }}
+            >
+              {loading ? "Memproses..." : "Login"}
+            </button>
           </form>
         </div>
       </div>
@@ -1364,10 +1397,16 @@ function AdminPanel({ user, isAuthReady, heroData, worksData, productsData, logs
   }
 
   return (
-    <div style={{ minHeight: "100vh", background: "#f9f9f9", paddingTop: 80 }}>
+    <div style={{ minHeight: "100vh", background: "#f9f9f9", paddingTop: 0 }}>
       <div style={{ background: "#fff", borderBottom: `1px solid ${TOKENS.border}`, padding: "0 48px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", height: 80 }}>
-          <div style={{ display: "flex", gap: 32 }}>
+          <div style={{ display: "flex", gap: 32, alignItems: "center" }}>
+            <span 
+              onClick={() => window.location.href = "/"}
+              style={{ fontWeight: 700, letterSpacing: "0.2em", fontSize: 14, cursor: "pointer", color: "#111", marginRight: 24 }}
+            >
+              D I E G M A
+            </span>
             {["hero", "works", "products", "logs"].map(tab => (
               <button key={tab} onClick={() => setActiveTab(tab)} style={{ background: "none", border: "none", padding: "28px 0", fontSize: 13, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.1em", color: activeTab === tab ? "#111" : "#888", borderBottom: activeTab === tab ? "2px solid #111" : "2px solid transparent", cursor: "pointer" }}>{tab}</button>
             ))}
@@ -2004,9 +2043,9 @@ export default function App() {
 
   return (
     <div style={{ fontFamily: "'Inter', sans-serif", background: TOKENS.bg, minHeight: "100vh" }}>
-      <Navbar currentPage={currentPage} setCurrentPage={setCurrentPage} />
+      {currentPage !== "admin" && <Navbar currentPage={currentPage} setCurrentPage={setCurrentPage} />}
       <main>{renderPage()}</main>
-      <Footer setCurrentPage={setCurrentPage} />
+      {currentPage !== "admin" && <Footer setCurrentPage={setCurrentPage} />}
     </div>
   );
 }
