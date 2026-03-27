@@ -530,16 +530,16 @@ function LogsPage() {
 
 function AboutPage() {
   const team = [
-    ["Binsar Priandika", "CEO, Founder"],
-    ["Danny Rizky", "CMO"],
-    ["Derris Tri Wahyu", "Project Manager"],
-    ["Febri Tegun", "Production Leader"],
-    ["Dimas Rengganis", "Production"],
-    ["Reza Baktiar", "Production"],
-    ["Andri Setiawan", "Production"],
-    ["Osama Abdur Rahman", "Product Designer"],
-    ["Achmad Fakhri", "Interior Designer"],
-    ["Dewi Cahya Mawadah", "Finance"],
+    ["SAEP", "CEO, Founder"],
+    ["SAEP", "CMO"],
+    ["SAEP", "Project Manager"],
+    ["SAEP", "Production Leader"],
+    ["SAEP", "Production"],
+    ["SAEP", "Production"],
+    ["SAEP", "Production"],
+    ["SAEP", "Product Designer"],
+    ["SAEP", "Interior Designer"],
+    ["SAEP", "Finance"],
   ];
 
   return (
