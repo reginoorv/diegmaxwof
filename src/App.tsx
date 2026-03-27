@@ -41,124 +41,9 @@ const TOKENS = {
   surface: "#F9F9F9"
 };
 
-const LOGS = [
-  { id: 1, cat: "Wawasan Desain", date: "24 Mar 2026", title: "Filosofi Ruang: Antara Fungsi dan Estetika", excerpt: "Bagaimana DIEGMA menyeimbangkan kebutuhan fungsional penghuni dengan estetika minimalis yang menjadi ciri khas kami. Kami percaya bahwa ruang yang baik adalah ruang yang berbicara tanpa suara.", img: "https://images.unsplash.com/photo-1518005020250-6859b2827c6d?auto=format&fit=crop&w=1200&q=80", featured: true, content: "Filosofi desain kami berakar pada keyakinan bahwa setiap ruang harus memiliki jiwa. Dalam proyek-proyek kami, kami selalu berusaha untuk menyeimbangkan antara aspek fungsionalitas yang kaku dengan keindahan estetika yang mengalir. Minimalisme bagi kami bukan berarti kekosongan, melainkan penggunaan elemen yang tepat untuk menciptakan dampak maksimal. Kami menggunakan material alami seperti kayu dan batu untuk memberikan kehangatan pada struktur modern, menciptakan harmoni yang menenangkan bagi penghuninya." },
-  { id: 2, cat: "Pembaruan Proyek", date: "15 Mar 2026", title: "Laporan Kemajuan: Vila Uluwatu Tahap 2", excerpt: "Melihat lebih dekat perkembangan pembangunan villa di Uluwatu. Saat ini kami sedang fokus pada detail finishing interior dan integrasi lanskap luar ruangan.", img: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=80", content: "Proyek Vila Uluwatu telah memasuki tahap krusial. Tim kami saat ini sedang mengerjakan detail finishing interior, termasuk pemasangan lantai marmer dan panel dinding kayu kustom. Di area luar, kolam renang infinity telah selesai dicor dan proses penanaman vegetasi lokal untuk lanskap sedang berlangsung. Kami menargetkan penyelesaian seluruh struktur utama dalam dua bulan ke depan, diikuti oleh instalasi furnitur kustom yang sedang diproduksi di workshop kami." },
-  { id: 3, cat: "Catatan Konstruksi", date: "02 Mar 2026", title: "Teknik Pondasi di Lahan Miring", excerpt: "Berbagi pengalaman teknis tim konstruksi DIEGMA dalam menangani tantangan topografi lahan miring di proyek perumahan Sentul. Keamanan struktur adalah prioritas utama.", img: "https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=1200&q=80", content: "Membangun di lahan miring memerlukan pendekatan teknik yang sangat spesifik. Di proyek Sentul, kami menerapkan sistem pondasi bored pile yang dikombinasikan dengan dinding penahan tanah (retaining wall) yang diperkuat. Analisis stabilitas lereng dilakukan secara mendalam sebelum konstruksi dimulai. Kami juga mengintegrasikan sistem drainase yang efisien untuk mencegah erosi tanah di bawah pondasi, memastikan keamanan jangka panjang bagi bangunan di atasnya." },
-  { id: 4, cat: "Desain Furnitur", date: "20 Feb 2026", title: "Material Kayu Solid untuk Kitchen Set", excerpt: "Mengapa kami memilih kayu solid berkualitas tinggi untuk setiap kitchen set custom kami. Ketahanan dan tekstur alami kayu memberikan karakter unik pada dapur Anda.", img: "https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&w=1200&q=80", content: "Dapur adalah jantung dari sebuah rumah, dan kitchen set adalah elemen utamanya. DIEGMA selalu merekomendasikan penggunaan kayu solid seperti jati atau oak untuk rangka dan pintu kabinet. Berbeda dengan material olahan, kayu solid menawarkan ketahanan terhadap kelembapan yang lebih baik dan keindahan serat alami yang tidak bisa ditiru. Setiap potongan kayu dipilih secara manual untuk memastikan kualitas dan konsistensi warna, kemudian difinishing dengan bahan ramah lingkungan yang aman untuk area pengolahan makanan." },
-  { id: 5, cat: "Wawasan Desain", date: "10 Feb 2026", title: "Pencahayaan Alami dalam Arsitektur Tropis", excerpt: "Memaksimalkan sinar matahari tanpa rasa panas yang berlebih. Strategi cross-ventilation dan shading yang kami terapkan di setiap desain rumah tropis.", img: "https://images.unsplash.com/photo-1507652313519-d4e9174996dd?auto=format&fit=crop&w=1200&q=80", content: "Dalam iklim tropis Indonesia, cahaya matahari adalah berkah sekaligus tantangan. Desain kami fokus pada bagaimana memasukkan cahaya alami sebanyak mungkin tanpa membawa panas yang berlebihan ke dalam ruangan. Kami menggunakan teknik bukaan lebar dengan sistem shading (pembayangan) yang tepat, seperti overhang atap yang panjang atau penggunaan kisi-kisi kayu. Hal ini dikombinasikan dengan ventilasi silang untuk memastikan udara segar terus mengalir, mengurangi ketergantungan pada pendingin ruangan elektrik." },
-  { id: 6, cat: "Pembaruan Proyek", date: "25 Jan 2026", title: "Serah Terima Kunci: Apartemen Menteng", excerpt: "Kebahagiaan klien adalah pencapaian terbesar kami. Dokumentasi proses serah terima unit apartemen di Menteng setelah renovasi total selama 4 bulan.", img: "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=1200&q=80", content: "Minggu ini kami merayakan penyelesaian renovasi apartemen di kawasan Menteng. Proyek ini melibatkan transformasi total dari unit lama menjadi ruang hunian bergaya Scandi-Industrial yang modern. Klien sangat puas dengan hasil akhir, terutama pada area ruang tamu terbuka yang kini terasa jauh lebih luas dan terang. Kami juga menginstal sistem smart home terintegrasi yang memungkinkan kontrol pencahayaan dan suhu melalui perangkat mobile, memberikan kenyamanan maksimal bagi penghuni." },
-];
+const LOGS = [];
 
-const WORKS = [
-  { 
-    id: 1,
-    label: "Vila Uluwatu", 
-    project: "Arsitektur & Lanskap", 
-    type: "Interior & Eksterior", 
-    year: "2026", 
-    bg: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=80",
-    description: "Proyek Vila Uluwatu adalah perwujudan dari kemewahan tropis yang modern. Terletak di tebing Uluwatu, vila ini dirancang untuk memaksimalkan pandangan laut yang spektakuler sambil mempertahankan privasi penghuninya.",
-    details: [
-      { title: "Lokasi", value: "Uluwatu, Bali" },
-      { title: "Luas Tanah", value: "1.200 m2" },
-      { title: "Status", value: "Selesai" },
-      { title: "Tantangan", value: "Topografi tebing yang curam" }
-    ],
-    gallery: [
-      "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1200&q=80"
-    ]
-  },
-  { 
-    id: 2,
-    label: "Apartemen Menteng", 
-    project: "Renovasi Interior", 
-    type: "Interior & Eksterior", 
-    year: "2025", 
-    bg: "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=1200&q=80",
-    description: "Transformasi unit apartemen klasik di Menteng menjadi ruang hunian modern yang elegan. Fokus utama adalah pada pencahayaan alami dan penggunaan material premium.",
-    details: [
-      { title: "Lokasi", value: "Menteng, Jakarta Pusat" },
-      { title: "Tipe", value: "3 Kamar Tidur" },
-      { title: "Gaya", value: "Modern Kontemporer" }
-    ],
-    gallery: [
-      "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1600566753190-17f0bb2a6c3e?auto=format&fit=crop&w=1200&q=80"
-    ]
-  },
-  { 
-    id: 3,
-    label: "Kantor SCBD", 
-    project: "Desain Ruang Kerja", 
-    type: "Interior & Eksterior", 
-    year: "2025", 
-    bg: "https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=1200&q=80",
-    description: "Menciptakan lingkungan kerja yang kolaboratif dan dinamis di jantung distrik bisnis Jakarta. Desain ini mengintegrasikan elemen alam ke dalam ruang kantor modern.",
-    details: [
-      { title: "Lokasi", value: "SCBD, Jakarta Selatan" },
-      { title: "Kapasitas", value: "150 Karyawan" },
-      { title: "Konsep", value: "Biophilic Design" }
-    ],
-    gallery: [
-      "https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1200&q=80"
-    ]
-  },
-  { 
-    id: 4,
-    label: "Penthouse Senopati", 
-    project: "Pembangunan Struktur", 
-    type: "Konstruksi", 
-    year: "2024", 
-    bg: "https://images.unsplash.com/photo-1600566753190-17f0bb2a6c3e?auto=format&fit=crop&w=1200&q=80",
-    description: "Pembangunan struktur penthouse mewah dengan tantangan teknis tinggi pada area atap dan integrasi sistem mekanikal elektrikal yang kompleks.",
-    details: [
-      { title: "Lokasi", value: "Senopati, Jakarta Selatan" },
-      { title: "Lantai", value: "Lantai 35-36" },
-      { title: "Fitur", value: "Private Rooftop Pool" }
-    ],
-    gallery: [
-      "https://images.unsplash.com/photo-1600566753190-17f0bb2a6c3e?auto=format&fit=crop&w=1200&q=80"
-    ]
-  },
-  { 
-    id: 5,
-    label: "Rumah Bintaro", 
-    project: "Konstruksi Bangunan", 
-    type: "Konstruksi", 
-    year: "2025", 
-    bg: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80",
-    description: "Hunian keluarga di Bintaro yang mengusung konsep rumah tumbuh dengan efisiensi ruang yang maksimal dan sirkulasi udara yang baik.",
-    details: [
-      { title: "Lokasi", value: "Bintaro, Tangerang Selatan" },
-      { title: "Luas Bangunan", value: "250 m2" },
-      { title: "Material Utama", value: "Bata Ekspos & Kayu" }
-    ],
-    gallery: [
-      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80"
-    ]
-  },
-  { 
-    id: 6,
-    label: "Dapur Kustom Kemang", 
-    project: "Kitchen Set Minimalis", 
-    type: "Furnitur", 
-    year: "2025", 
-    bg: "https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&w=1200&q=80",
-    description: "Pembuatan kitchen set kustom yang menggabungkan fungsionalitas tinggi dengan estetika minimalis. Menggunakan material kayu solid berkualitas tinggi.",
-    details: [
-      { title: "Lokasi", value: "Kemang, Jakarta Selatan" },
-      { title: "Material", value: "Solid Oak & Quartz" },
-      { title: "Waktu Produksi", value: "6 Minggu" }
-    ],
-    gallery: [
-      "https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&w=1200&q=80"
-    ]
-  },
-];
+const WORKS = [];
 
 // --- Sub-Components ---
 
@@ -313,12 +198,7 @@ function Footer({ setCurrentPage }) {
 
 function HeroSlider({ slides }) {
   const [slide, setSlide] = useState(0);
-  const displaySlides = slides && slides.length > 0 ? slides : [
-    "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1920&q=80",
-    "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=1920&q=80",
-    "https://images.unsplash.com/photo-1600566753190-17f0bb2a6c3e?auto=format&fit=crop&w=1920&q=80",
-    "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1920&q=80"
-  ];
+  const displaySlides = slides && slides.length > 0 ? slides : [];
 
   useEffect(() => {
     const t = setTimeout(() => setSlide((s) => (s + 1) % displaySlides.length), 5000);
@@ -582,97 +462,7 @@ function ProductsPage({ setCurrentPage, setSelectedProduct, productsData }) {
     return () => clearTimeout(timer);
   }, [activeTab]);
 
-  const allProducts = productsData && productsData.length > 0 ? productsData : [
-    // Interior & Exterior
-    { 
-      name: "Desain Interior Hunian", 
-      price: "Mulai dari IDR 150rb/m2", 
-      cat: "Interior & Eksterior", 
-      img: "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=800&q=80",
-      desc: "Layanan desain interior komprehensif untuk rumah tinggal, apartemen, dan vila. Kami fokus pada penciptaan ruang yang mencerminkan kepribadian Anda dengan sentuhan estetika modern dan fungsionalitas maksimal."
-    },
-    { 
-      name: "Desain Ruang Komersial", 
-      price: "Mulai dari IDR 200rb/m2", 
-      cat: "Interior & Eksterior", 
-      img: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=80",
-      desc: "Solusi desain untuk kantor, kafe, restoran, dan toko ritel. Kami membantu bisnis Anda menciptakan identitas visual yang kuat melalui desain ruang yang menarik bagi pelanggan dan produktif bagi karyawan."
-    },
-    { 
-      name: "Renovasi Fasad Eksterior", 
-      price: "Penawaran Kustom", 
-      cat: "Interior & Eksterior", 
-      img: "https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=800&q=80",
-      desc: "Transformasi tampilan luar bangunan Anda. Kami memberikan solusi desain fasad yang modern dan tahan lama, meningkatkan nilai properti serta memberikan kesan pertama yang mengesankan."
-    },
-    { 
-      name: "Desain Lanskap & Taman", 
-      price: "Mulai dari IDR 100rb/m2", 
-      cat: "Interior & Eksterior", 
-      img: "https://images.unsplash.com/photo-1531835597930-518295974661?auto=format&fit=crop&w=800&q=80",
-      desc: "Perancangan area terbuka hijau yang harmonis. Kami mengintegrasikan elemen alam dengan arsitektur bangunan untuk menciptakan oase pribadi yang menenangkan di lingkungan hunian Anda."
-    },
-    
-    // Construction
-    { 
-      name: "Pembangunan Rumah Baru", 
-      price: "Mulai dari IDR 5jt/m2", 
-      cat: "Konstruksi", 
-      img: "https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=800&q=80",
-      desc: "Layanan konstruksi rumah tinggal dari nol hingga serah terima kunci. Kami menjamin kualitas struktur bangunan yang kokoh dengan pengawasan ketat di setiap tahap pembangunan."
-    },
-    { 
-      name: "Fit-out Kantor", 
-      price: "Mulai dari IDR 4jt/m2", 
-      cat: "Konstruksi", 
-      img: "https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=800&q=80",
-      desc: "Pengerjaan interior kantor secara menyeluruh, termasuk partisi, plafon, lantai, dan instalasi elektrikal. Kami memastikan ruang kerja Anda siap digunakan tepat waktu dengan standar kualitas tinggi."
-    },
-    { 
-      name: "Renovasi Struktural", 
-      price: "Penawaran Kustom", 
-      cat: "Konstruksi", 
-      img: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=800&q=80",
-      desc: "Perbaikan atau perubahan struktur bangunan lama. Kami menangani penambahan lantai, penguatan kolom, hingga perubahan tata letak ruangan dengan perhitungan teknis yang akurat."
-    },
-    
-    // Furniture
-    { 
-      name: "Kitchen Set Kustom", 
-      price: "Mulai dari IDR 2.5jt/m", 
-      cat: "Furnitur", 
-      img: "https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&w=800&q=80",
-      desc: "Pembuatan lemari dapur kustom yang memaksimalkan setiap sudut ruangan. Menggunakan material berkualitas tinggi yang tahan lembap dan panas, dengan desain yang ergonomis."
-    },
-    { 
-      name: "Lemari Pakaian Bespoke", 
-      price: "Mulai dari IDR 2.2jt/m", 
-      cat: "Furnitur", 
-      img: "https://images.unsplash.com/photo-1595428774223-ef52624120d2?auto=format&fit=crop&w=800&q=80",
-      desc: "Walk-in closet atau lemari pakaian kustom yang dirancang sesuai dengan koleksi busana Anda. Kami menawarkan berbagai pilihan finishing dan aksesoris interior lemari yang mewah."
-    },
-    { 
-      name: "Meja Kerja Minimalis", 
-      price: "IDR 1.850.000", 
-      cat: "Furnitur", 
-      img: "https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?auto=format&fit=crop&w=800&q=80",
-      desc: "Meja kerja dengan desain bersih dan fungsional, cocok untuk ruang kerja di rumah. Dibuat dengan material kayu solid atau plywood berkualitas dengan finishing yang halus."
-    },
-    { 
-      name: "Set Meja Makan", 
-      price: "IDR 5.400.000", 
-      cat: "Furnitur", 
-      img: "https://images.unsplash.com/photo-1533090161767-e6ffed986c88?auto=format&fit=crop&w=800&q=80",
-      desc: "Satu set meja makan dengan 4 atau 6 kursi yang dirancang untuk kenyamanan saat bersantap bersama keluarga. Desain yang timeless yang cocok untuk berbagai gaya interior."
-    },
-    { 
-      name: "Kredensa Ruang Tamu", 
-      price: "IDR 3.200.000", 
-      cat: "Furnitur", 
-      img: "https://images.unsplash.com/photo-1594026112284-02bb6f3352fe?auto=format&fit=crop&w=800&q=80",
-      desc: "Lemari penyimpanan rendah untuk ruang tamu atau ruang keluarga. Memberikan ruang penyimpanan ekstra sekaligus menjadi elemen dekoratif yang mempercantik ruangan."
-    },
-  ];
+  const allProducts = productsData && productsData.length > 0 ? productsData : [];
 
   const filtered = activeTab === "Semua" ? allProducts : allProducts.filter(p => p.cat === activeTab);
 
@@ -1420,6 +1210,41 @@ function AdminPanel({ user, isAuthReady, heroData, worksData, productsData, logs
         {activeTab === "works" && <ContentManager type="works" items={worksData} />}
         {activeTab === "products" && <ContentManager type="products" items={productsData} />}
         {activeTab === "logs" && <ContentManager type="logs" items={logsData} />}
+      </div>
+
+      <div style={{ padding: "0 48px 80px", borderTop: `1px solid ${TOKENS.border}`, marginTop: 48, paddingTop: 48 }}>
+        <div style={{ background: "#fff", padding: 32, borderRadius: 8, border: "1px solid #fee2e2" }}>
+          <h3 style={{ fontSize: 16, fontWeight: 700, color: "#991b1b", marginBottom: 8 }}>Zone Bahaya: Reset Database</h3>
+          <p style={{ fontSize: 13, color: "#666", marginBottom: 24 }}>Gunakan fitur ini untuk menghapus semua isi Produk, Karya, dan Catatan sekaligus jika Anda ingin memulai dari awal.</p>
+          <button 
+            onClick={async () => {
+              if (confirm("APAKAH ANDA YAKIN? Semua data Produk, Karya, dan Catatan akan dihapus permanen.")) {
+                if (confirm("KONFIRMASI TERAKHIR: Tindakan ini tidak dapat dibatalkan.")) {
+                  try {
+                    // Delete works
+                    for (const item of worksData) {
+                      await deleteDoc(doc(db, "works", item.id));
+                    }
+                    // Delete products
+                    for (const item of productsData) {
+                      await deleteDoc(doc(db, "products", item.id));
+                    }
+                    // Delete logs
+                    for (const item of logsData) {
+                      await deleteDoc(doc(db, "logs", item.id));
+                    }
+                    alert("Semua data berhasil dihapus. Silakan mulai isi dari awal.");
+                  } catch (err) {
+                    handleFirestoreError(err, OperationType.DELETE, "all");
+                  }
+                }
+              }
+            }}
+            style={{ padding: "12px 24px", background: "#ef4444", color: "#fff", border: "none", fontWeight: 600, borderRadius: 4, cursor: "pointer" }}
+          >
+            Reset All Content
+          </button>
+        </div>
       </div>
     </div>
   );
