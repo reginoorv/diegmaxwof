@@ -1425,6 +1425,58 @@ function AdminPanel({ user, isAuthReady, heroData, worksData, productsData, logs
   );
 }
 
+function ImageUpload({ label, value, onChange }) {
+  const [uploading, setUploading] = useState(false);
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (file.size > 800000) {
+      alert("Ukuran gambar terlalu besar (maksimal 800KB).");
+      return;
+    }
+
+    setUploading(true);
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      onChange(reader.result);
+      setUploading(false);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  return (
+    <div style={{ marginBottom: 24 }}>
+      <label style={{ display: "block", fontSize: 11, fontWeight: 600, marginBottom: 8, textTransform: "uppercase" }}>{label}</label>
+      <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
+        {value && (
+          <div style={{ width: 80, height: 80, borderRadius: 4, overflow: "hidden", border: `1px solid ${TOKENS.border}`, flexShrink: 0 }}>
+            <img src={value} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          </div>
+        )}
+        <div style={{ flex: 1 }}>
+          <input 
+            type="file" 
+            accept="image/*" 
+            onChange={handleFileChange} 
+            style={{ 
+              width: "100%", 
+              padding: "10px", 
+              border: `1px dashed ${TOKENS.border}`, 
+              fontSize: 12,
+              cursor: "pointer"
+            }} 
+          />
+          <div style={{ fontSize: 10, color: "#888", marginTop: 4 }}>
+            {uploading ? "Mengonversi..." : "Pilih file gambar (JPG, PNG, WEBP)"}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function HeroManager({ slides }) {
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState({ headline: "", subheadline: "", imageUrl: "" });
@@ -1467,10 +1519,11 @@ function HeroManager({ slides }) {
             <input value={form.subheadline} onChange={e => setForm({ ...form, subheadline: e.target.value })} style={{ width: "100%", padding: 12, border: `1px solid ${TOKENS.border}` }} required />
           </div>
         </div>
-        <div style={{ marginBottom: 32 }}>
-          <label style={{ display: "block", fontSize: 11, fontWeight: 600, marginBottom: 8, textTransform: "uppercase" }}>Image URL</label>
-          <input value={form.imageUrl} onChange={e => setForm({ ...form, imageUrl: e.target.value })} style={{ width: "100%", padding: 12, border: `1px solid ${TOKENS.border}` }} required />
-        </div>
+        <ImageUpload 
+          label="Hero Image" 
+          value={form.imageUrl} 
+          onChange={val => setForm({ ...form, imageUrl: val })} 
+        />
         <button type="submit" style={{ padding: "12px 32px", background: "#111", color: "#fff", border: "none", fontWeight: 600 }}>{editing ? "Update Slide" : "Add Slide"}</button>
         {editing && <button type="button" onClick={() => { setEditing(null); setForm({ headline: "", subheadline: "", imageUrl: "" }); }} style={{ marginLeft: 16, background: "none", border: "none", color: "#888", fontWeight: 600 }}>Cancel</button>}
       </form>
@@ -1599,16 +1652,16 @@ function ContentForm({ type, initialData, onClose }) {
         </div>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24, marginBottom: 24 }}>
-        <div>
-          <label style={{ display: "block", fontSize: 11, fontWeight: 600, marginBottom: 8, textTransform: "uppercase" }}>Date / Price / Year</label>
-          <input value={form.date || form.price || form.year} onChange={e => setForm({ ...form, date: e.target.value, price: e.target.value, year: e.target.value })} style={{ width: "100%", padding: 12, border: `1px solid ${TOKENS.border}` }} required />
-        </div>
-        <div>
-          <label style={{ display: "block", fontSize: 11, fontWeight: 600, marginBottom: 8, textTransform: "uppercase" }}>Image URL</label>
-          <input value={form.imageUrl || form.img} onChange={e => setForm({ ...form, imageUrl: e.target.value, img: e.target.value })} style={{ width: "100%", padding: 12, border: `1px solid ${TOKENS.border}` }} required />
-        </div>
+      <div style={{ marginBottom: 24 }}>
+        <label style={{ display: "block", fontSize: 11, fontWeight: 600, marginBottom: 8, textTransform: "uppercase" }}>Date / Price / Year</label>
+        <input value={form.date || form.price || form.year} onChange={e => setForm({ ...form, date: e.target.value, price: e.target.value, year: e.target.value })} style={{ width: "100%", padding: 12, border: `1px solid ${TOKENS.border}` }} required />
       </div>
+
+      <ImageUpload 
+        label="Main Image" 
+        value={form.imageUrl || form.img} 
+        onChange={val => setForm({ ...form, imageUrl: val, img: val })} 
+      />
 
       <div style={{ marginBottom: 24 }}>
         <label style={{ display: "block", fontSize: 11, fontWeight: 600, marginBottom: 8, textTransform: "uppercase" }}>Excerpt / Short Description</label>
