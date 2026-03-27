@@ -1,0 +1,72 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    // Collection: settings/hero
+    // Fields: headline (string), subheadline (string), imageUrl (string)
+    //
+    // Collection: works
+    // Fields: title (string), category (string), year (string), description (string), imageUrl (string), gallery (list), createdAt (timestamp)
+    //
+    // Collection: products
+    // Fields: name (string), category (string), price (string), description (string), imageUrl (string), specs (list), createdAt (timestamp)
+    //
+    // Collection: logs
+    // Fields: title (string), category (string), date (string), content (string), imageUrl (string), createdAt (timestamp)
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && 
+             request.auth.token.email == "tokduapuludua@gmail.com" && 
+             request.auth.token.email_verified == true;
+    }
+
+    function isValidString(field, min, max) {
+      return request.resource.data[field] is string && 
+             request.resource.data[field].size() >= min && 
+             request.resource.data[field].size() <= max;
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    // Settings
+    match /settings/{settingId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Works
+    match /works/{workId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Products
+    match /products/{productId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Logs
+    match /logs/{logId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

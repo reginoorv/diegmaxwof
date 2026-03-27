@@ -1,0 +1,65 @@
+{
+  "entities": {
+    "Hero": {
+      "title": "Hero Section",
+      "description": "Configuration for the homepage hero section",
+      "type": "object",
+      "properties": {
+        "headline": { "type": "string" },
+        "subheadline": { "type": "string" },
+        "imageUrl": { "type": "string" }
+      },
+      "required": ["headline", "subheadline", "imageUrl"]
+    },
+    "Work": {
+      "title": "Work",
+      "description": "An architecture or interior design project",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "category": { "type": "string" },
+        "year": { "type": "string" },
+        "description": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "gallery": { "type": "array", "items": { "type": "string" } },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "category", "year", "description", "imageUrl"]
+    },
+    "Product": {
+      "title": "Product",
+      "description": "A furniture or object product",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "category": { "type": "string" },
+        "price": { "type": "string" },
+        "description": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "specs": { "type": "array", "items": { "type": "string" } },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "category", "price", "description", "imageUrl"]
+    },
+    "Log": {
+      "title": "Log",
+      "description": "A journal entry or article",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "category": { "type": "string" },
+        "date": { "type": "string" },
+        "content": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "category", "date", "content", "imageUrl"]
+    }
+  },
+  "firestore": {
+    "/settings/hero": { "schema": "Hero", "description": "Hero section settings" },
+    "/works/{workId}": { "schema": "Work", "description": "Collection of projects" },
+    "/products/{productId}": { "schema": "Product", "description": "Collection of products" },
+    "/logs/{logId}": { "schema": "Log", "description": "Collection of journal entries" }
+  }
+}
