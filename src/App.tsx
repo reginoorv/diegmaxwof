@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { 
   onAuthStateChanged, 
   signInWithEmailAndPassword, 
@@ -201,6 +201,7 @@ function HeroSlider({ slides }) {
   const displaySlides = slides && slides.length > 0 ? slides : [];
 
   useEffect(() => {
+    if (displaySlides.length === 0) return;
     const t = setTimeout(() => setSlide((s) => (s + 1) % displaySlides.length), 5000);
     return () => clearTimeout(t);
   }, [slide, displaySlides.length]);
@@ -209,8 +210,6 @@ function HeroSlider({ slides }) {
     <div style={{ position: "relative", width: "100%", height: "85vh", background: "#000", overflow: "hidden" }}>
       {displaySlides.map((s, i) => {
         const imgUrl = typeof s === "string" ? s : s.imageUrl || s.img;
-        const headline = typeof s === "string" ? null : s.headline || s.title;
-        const subheadline = typeof s === "string" ? null : s.subheadline || s.subtitle;
 
         return (
           <div key={i} style={{
@@ -228,22 +227,15 @@ function HeroSlider({ slides }) {
               transition: "transform 6s ease-out"
             }} />
             <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.2)" }} />
-            
-            {headline && (
-              <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", color: "#fff", textAlign: "center", padding: 24, zIndex: 2 }}>
-                <div style={{ fontSize: 12, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.3em", marginBottom: 24, opacity: i === slide ? 1 : 0, transform: i === slide ? "translateY(0)" : "translateY(20px)", transition: "all 1s 0.5s" }}>{subheadline}</div>
-                <h1 style={{ fontSize: "clamp(40px, 8vw, 100px)", fontWeight: 700, letterSpacing: "-0.04em", lineHeight: 0.9, textTransform: "uppercase", maxWidth: 1000, opacity: i === slide ? 1 : 0, transform: i === slide ? "translateY(0)" : "translateY(30px)", transition: "all 1s 0.7s" }}>{headline}</h1>
-              </div>
-            )}
           </div>
         );
       })}
       {/* Arrows */}
-      {[["‹", -1, "left"], ["›", 1, "right"]].map(([arrow, dir, side]) => (
+      {displaySlides.length > 1 && [["‹", -1, "left"], ["›", 1, "right"]].map(([arrow, dir, side]) => (
         <button key={side} onClick={() => setSlide((s) => (s + displaySlides.length + dir) % displaySlides.length)}
           className="slider-arrow"
           style={{
-            position: "absolute", [side]: 24, top: "50%", transform: "translateY(-50%)",
+            position: "absolute", [side as any]: 24, top: "50%", transform: "translateY(-50%)",
             width: 40, height: 40, borderRadius: "50%", border: `1px solid ${TOKENS.border}`,
             background: "#fff", fontSize: 18, cursor: "pointer", zIndex: 2,
             transition: "all 0.2s", display: "flex", alignItems: "center", justifyContent: "center"
@@ -252,11 +244,13 @@ function HeroSlider({ slides }) {
         </button>
       ))}
       {/* Dots */}
-      <div style={{ position: "absolute", bottom: 20, left: "50%", transform: "translateX(-50%)", display: "flex", gap: 8 }}>
-        {displaySlides.map((_, i) => (
-          <div key={i} onClick={() => setSlide(i)} style={{ width: 6, height: 6, borderRadius: "50%", background: i === slide ? "#111" : "#CCC", cursor: "pointer", transition: "background 0.2s" }} />
-        ))}
-      </div>
+      {displaySlides.length > 1 && (
+        <div style={{ position: "absolute", bottom: 20, left: "50%", transform: "translateX(-50%)", display: "flex", gap: 8, zIndex: 2 }}>
+          {displaySlides.map((_, i) => (
+            <div key={i} onClick={() => setSlide(i)} style={{ width: 6, height: 6, borderRadius: "50%", background: i === slide ? "#111" : "#CCC", cursor: "pointer", transition: "background 0.2s" }} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -394,13 +388,13 @@ function HomePage({ setCurrentPage, setSelectedLog, setSelectedWork, heroData, w
           {displayWorks.slice(0, 4).map((w, i) => (
             <div key={i} className="reveal-child reveal work-card" onClick={() => handleWorkClick(w)} style={{ cursor: "pointer", position: "relative" }}>
               <div className="img-zoom-wrap">
-                <div className="img-inner" style={{ backgroundImage: `url(${w.bg})`, backgroundSize: "cover", backgroundPosition: "center", aspectRatio: "1/1", width: "100%" }} />
+                <div className="img-inner" style={{ backgroundImage: `url(${w.bg || w.imageUrl || w.img})`, backgroundSize: "cover", backgroundPosition: "center", aspectRatio: "1/1", width: "100%" }} />
                 <div className="work-overlay">
                   <span style={{ fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.1em" }}>Lihat Proyek</span>
                 </div>
               </div>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 0" }}>
-                <div style={{ fontSize: 13, color: TOKENS.textPrimary, fontWeight: 500 }}>{w.label}</div>
+                <div style={{ fontSize: 13, color: TOKENS.textPrimary, fontWeight: 500 }}>{w.label || w.title}</div>
                 <div style={{ width: 24, height: 24, border: `1px solid ${TOKENS.border}`, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.3s" }} className="work-arrow">
                   <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
                 </div>
@@ -550,7 +544,7 @@ function WorksPage({ setCurrentPage, setSelectedWork, worksData }) {
   }, [activeFilter]);
 
   const displayWorks = worksData && worksData.length > 0 ? worksData : WORKS;
-  const filteredWorks = activeFilter === "Semua Proyek" ? displayWorks : displayWorks.filter(w => w.type === activeFilter);
+  const filteredWorks = activeFilter === "Semua Proyek" ? displayWorks : displayWorks.filter(w => (w.category || w.type) === activeFilter);
 
   return (
     <div style={{ paddingTop: 80 }}>
@@ -580,16 +574,16 @@ function WorksPage({ setCurrentPage, setSelectedWork, worksData }) {
           {filteredWorks.map((w, i) => (
             <div key={i} className="reveal-child reveal work-card" onClick={() => handleWorkClick(w)} style={{ cursor: "pointer", position: "relative" }}>
               <div className="img-zoom-wrap" style={{ marginBottom: 24, overflow: "hidden" }}>
-                <div className="img-inner" style={{ background: `url(${w.bg})`, backgroundSize: 'cover', backgroundPosition: 'center', aspectRatio: "16/10", width: "100%" }} />
+                <div className="img-inner" style={{ background: `url(${w.bg || w.imageUrl || w.img})`, backgroundSize: 'cover', backgroundPosition: 'center', aspectRatio: "16/10", width: "100%" }} />
                 <div className="work-overlay">
                   <span style={{ fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.1em" }}>Lihat Proyek</span>
                 </div>
               </div>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
                 <div>
-                  <div style={{ fontSize: 11, color: TOKENS.textMuted, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>{w.type} — {w.year}</div>
-                  <div style={{ fontSize: 24, color: TOKENS.textPrimary, fontWeight: 600, letterSpacing: "-0.01em" }}>{w.label}</div>
-                  <div style={{ fontSize: 14, color: TOKENS.textMuted, marginTop: 4, fontWeight: 300 }}>{w.project}</div>
+                  <div style={{ fontSize: 11, color: TOKENS.textMuted, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>{w.category || w.type} — {w.year}</div>
+                  <div style={{ fontSize: 24, color: TOKENS.textPrimary, fontWeight: 600, letterSpacing: "-0.01em" }}>{w.label || w.title}</div>
+                  <div style={{ fontSize: 14, color: TOKENS.textMuted, marginTop: 4, fontWeight: 300 }}>{w.project || w.description?.substring(0, 60)}</div>
                 </div>
                 <div style={{ width: 40, height: 40, border: `1px solid ${TOKENS.border}`, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.3s" }} className="work-arrow">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
@@ -652,31 +646,33 @@ function WorkDetailPage({ work, setCurrentPage, setSelectedWork, worksData }) {
           {/* Left: Info */}
           <div className="reveal-child">
             <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 32 }}>
-              <span style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: TOKENS.textPrimary }}>{work.type}</span>
+              <span style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: TOKENS.textPrimary }}>{work.category || work.type}</span>
               <div style={{ width: 4, height: 4, borderRadius: "50%", background: TOKENS.border }} />
               <span style={{ fontSize: 12, fontWeight: 500, color: TOKENS.textMuted }}>{work.year}</span>
             </div>
             
-            <h1 style={{ fontSize: "clamp(32px, 5vw, 64px)", fontWeight: 700, color: TOKENS.textPrimary, marginBottom: 48, lineHeight: 1.1, letterSpacing: "-0.03em" }}>{work.label}</h1>
+            <h1 style={{ fontSize: "clamp(32px, 5vw, 64px)", fontWeight: 700, color: TOKENS.textPrimary, marginBottom: 48, lineHeight: 1.1, letterSpacing: "-0.03em" }}>{work.label || work.title}</h1>
             
             <div style={{ marginBottom: 64 }}>
               <div style={{ fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.1em", color: TOKENS.textMuted, marginBottom: 24, borderBottom: `1px solid ${TOKENS.border}`, paddingBottom: 12 }}>Tentang Proyek</div>
               <p style={{ fontSize: 16, color: TOKENS.textBody, lineHeight: 1.8, fontWeight: 300 }}>{work.description}</p>
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 40 }}>
-              {work.details.map((d, i) => (
-                <div key={i}>
-                  <div style={{ fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.1em", color: TOKENS.textMuted, marginBottom: 8 }}>{d.title}</div>
-                  <div style={{ fontSize: 14, color: TOKENS.textPrimary, fontWeight: 500 }}>{d.value}</div>
-                </div>
-              ))}
-            </div>
+            {work.details && work.details.length > 0 && (
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 40 }}>
+                {work.details.map((d, i) => (
+                  <div key={i}>
+                    <div style={{ fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.1em", color: TOKENS.textMuted, marginBottom: 8 }}>{d.title}</div>
+                    <div style={{ fontSize: 14, color: TOKENS.textPrimary, fontWeight: 500 }}>{d.value}</div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Right: Main Image */}
           <div className="img-zoom-wrap reveal-child" style={{ width: "100%", aspectRatio: "4/5", overflow: "hidden" }}>
-            <div className="img-inner" style={{ width: "100%", height: "100%", backgroundImage: `url(${work.bg})`, backgroundSize: "cover", backgroundPosition: "center" }} />
+            <div className="img-inner" style={{ width: "100%", height: "100%", backgroundImage: `url(${work.bg || work.imageUrl || work.img})`, backgroundSize: "cover", backgroundPosition: "center" }} />
           </div>
         </div>
 
@@ -695,33 +691,36 @@ function WorkDetailPage({ work, setCurrentPage, setSelectedWork, worksData }) {
         )}
 
         {/* Next Project Section */}
-        <div style={{ marginTop: 160, borderTop: `1px solid ${TOKENS.border}`, paddingTop: 80 }} className="reveal">
-          <div style={{ display: "flex", justifyContent: "center", marginBottom: 40 }}>
-            <span style={{ fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.2em", color: TOKENS.textMuted }}>Proyek Selanjutnya</span>
-          </div>
-          {(() => {
-            const currentIndex = WORKS.findIndex(w => w.id === work.id);
-            const nextWork = WORKS[(currentIndex + 1) % WORKS.length];
-            return (
-              <div 
-                onClick={() => {
-                  setSelectedWork(nextWork);
-                  setCurrentPage("work-detail");
-                  window.scrollTo(0, 0);
-                }}
-                style={{ textAlign: "center", cursor: "pointer" }}
-                className="reveal-child next-project-link"
-              >
-                <h2 style={{ fontSize: "clamp(40px, 8vw, 120px)", fontWeight: 700, letterSpacing: "-0.04em", textTransform: "uppercase", color: TOKENS.textPrimary, transition: "all 0.4s" }}>{nextWork.label}</h2>
-                <div style={{ display: "flex", justifyContent: "center", marginTop: 24 }}>
-                  <div style={{ width: 64, height: 64, border: `1px solid ${TOKENS.border}`, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.3s" }} className="work-arrow">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
+        {worksData && worksData.length > 1 && (
+          <div style={{ marginTop: 160, borderTop: `1px solid ${TOKENS.border}`, paddingTop: 80 }} className="reveal">
+            <div style={{ display: "flex", justifyContent: "center", marginBottom: 40 }}>
+              <span style={{ fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.2em", color: TOKENS.textMuted }}>Proyek Selanjutnya</span>
+            </div>
+            {(() => {
+              const currentIndex = worksData.findIndex(w => w.id === work.id);
+              const nextWork = worksData[(currentIndex + 1) % worksData.length];
+              if (!nextWork) return null;
+              return (
+                <div 
+                  onClick={() => {
+                    setSelectedWork(nextWork);
+                    setCurrentPage("work-detail");
+                    window.scrollTo(0, 0);
+                  }}
+                  style={{ textAlign: "center", cursor: "pointer" }}
+                  className="reveal-child next-project-link"
+                >
+                  <h2 style={{ fontSize: "clamp(40px, 8vw, 120px)", fontWeight: 700, letterSpacing: "-0.04em", textTransform: "uppercase", color: TOKENS.textPrimary, transition: "all 0.4s" }}>{nextWork.label || nextWork.title}</h2>
+                  <div style={{ display: "flex", justifyContent: "center", marginTop: 24 }}>
+                    <div style={{ width: 64, height: 64, border: `1px solid ${TOKENS.border}`, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.3s" }} className="work-arrow">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
+                    </div>
                   </div>
                 </div>
-              </div>
-            );
-          })()}
-        </div>
+              );
+            })()}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -777,7 +776,7 @@ function ProductDetailPage({ product, setCurrentPage }) {
             <div className="reveal-child" style={{ marginBottom: 48 }}>
               <div style={{ fontSize: 11, fontWeight: 600, textTransform: "uppercase", color: TOKENS.textMuted, marginBottom: 16, letterSpacing: "0.1em" }}>Deskripsi Produk</div>
               <p style={{ fontSize: 15, color: TOKENS.textBody, lineHeight: 1.8, fontWeight: 300 }}>
-                {product.desc || "Layanan profesional dari DIEGMA Studio yang mengutamakan kualitas, estetika, dan fungsionalitas. Kami memastikan setiap detail dikerjakan dengan presisi tinggi untuk memenuhi ekspektasi Anda."}
+                {product.description || product.desc || "Layanan profesional dari DIEGMA Studio yang mengutamakan kualitas, estetika, dan fungsionalitas. Kami memastikan setiap detail dikerjakan dengan presisi tinggi untuk memenuhi ekspektasi Anda."}
               </p>
             </div>
 
@@ -1253,22 +1252,28 @@ function AdminPanel({ user, isAuthReady, heroData, worksData, productsData, logs
 function ImageUpload({ label, value, onChange }) {
   const [uploading, setUploading] = useState(false);
 
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 800000) {
-      alert("Ukuran gambar terlalu besar (maksimal 800KB).");
+    // Limit size to 2MB for better performance
+    if (file.size > 2000000) {
+      alert("Ukuran gambar terlalu besar (maksimal 2MB).");
       return;
     }
 
     setUploading(true);
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      onChange(reader.result);
+    try {
+      const storageRef = ref(storage, `uploads/${Date.now()}_${file.name}`);
+      const snapshot = await uploadBytes(storageRef, file);
+      const url = await getDownloadURL(snapshot.ref);
+      onChange(url);
+    } catch (err) {
+      console.error("Upload error:", err);
+      alert("Gagal mengunggah gambar.");
+    } finally {
       setUploading(false);
-    };
-    reader.readAsDataURL(file);
+    }
   };
 
   return (
@@ -1285,16 +1290,17 @@ function ImageUpload({ label, value, onChange }) {
             type="file" 
             accept="image/*" 
             onChange={handleFileChange} 
+            disabled={uploading}
             style={{ 
               width: "100%", 
               padding: "10px", 
               border: `1px dashed ${TOKENS.border}`, 
               fontSize: 12,
-              cursor: "pointer"
+              cursor: uploading ? "not-allowed" : "pointer"
             }} 
           />
           <div style={{ fontSize: 10, color: "#888", marginTop: 4 }}>
-            {uploading ? "Mengonversi..." : "Pilih file gambar (JPG, PNG, WEBP)"}
+            {uploading ? "Mengunggah..." : "Pilih file gambar (JPG, PNG, WEBP)"}
           </div>
         </div>
       </div>
@@ -1303,21 +1309,28 @@ function ImageUpload({ label, value, onChange }) {
 }
 
 function HeroManager({ slides }) {
-  const [editing, setEditing] = useState(null);
-  const [form, setForm] = useState({ headline: "", subheadline: "", imageUrl: "" });
+  const [uploading, setUploading] = useState(false);
 
-  const handleSave = async (e) => {
-    e.preventDefault();
+  const handleUploadImages = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []) as File[];
+    if (files.length === 0) return;
+
+    setUploading(true);
     try {
-      if (editing) {
-        await setDoc(doc(db, "settings", "hero"), { slides: slides.map(s => s.id === editing ? { ...s, ...form } : s) });
-      } else {
-        await setDoc(doc(db, "settings", "hero"), { slides: [...slides, { id: Date.now(), ...form }] });
+      const newSlides = [...slides];
+      for (const file of files) {
+        const storageRef = ref(storage, `hero/${Date.now()}_${file.name}`);
+        const snapshot = await uploadBytes(storageRef, file);
+        const url = await getDownloadURL(snapshot.ref);
+        newSlides.push({ id: Date.now() + Math.random(), imageUrl: url });
       }
-      setEditing(null);
-      setForm({ headline: "", subheadline: "", imageUrl: "" });
+      await setDoc(doc(db, "settings", "hero"), { slides: newSlides });
     } catch (err) {
-      handleFirestoreError(err, OperationType.WRITE, "settings/hero");
+      console.error("Hero upload error:", err);
+      alert("Gagal mengunggah gambar hero.");
+    } finally {
+      setUploading(false);
+      if (e.target) e.target.value = ""; // Reset input
     }
   };
 
@@ -1332,42 +1345,50 @@ function HeroManager({ slides }) {
 
   return (
     <div>
-      <h2 style={{ fontSize: 24, fontWeight: 700, marginBottom: 32 }}>Manage Hero Slides</h2>
-      <form onSubmit={handleSave} style={{ background: "#fff", padding: 32, borderRadius: 8, border: `1px solid ${TOKENS.border}`, marginBottom: 48 }}>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24, marginBottom: 24 }}>
-          <div>
-            <label style={{ display: "block", fontSize: 11, fontWeight: 600, marginBottom: 8, textTransform: "uppercase" }}>Headline</label>
-            <input value={form.headline} onChange={e => setForm({ ...form, headline: e.target.value })} style={{ width: "100%", padding: 12, border: `1px solid ${TOKENS.border}` }} required />
-          </div>
-          <div>
-            <label style={{ display: "block", fontSize: 11, fontWeight: 600, marginBottom: 8, textTransform: "uppercase" }}>Subheadline</label>
-            <input value={form.subheadline} onChange={e => setForm({ ...form, subheadline: e.target.value })} style={{ width: "100%", padding: 12, border: `1px solid ${TOKENS.border}` }} required />
-          </div>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 32 }}>
+        <h2 style={{ fontSize: 24, fontWeight: 700 }}>Manage Hero Slides</h2>
+        <div style={{ position: "relative" }}>
+          <input 
+            type="file" 
+            multiple 
+            accept="image/*" 
+            onChange={handleUploadImages} 
+            disabled={uploading}
+            id="hero-upload"
+            style={{ display: "none" }}
+          />
+          <label 
+            htmlFor="hero-upload"
+            style={{ 
+              padding: "12px 24px", 
+              background: uploading ? "#888" : "#111", 
+              color: "#fff", 
+              border: "none", 
+              fontWeight: 600, 
+              cursor: uploading ? "not-allowed" : "pointer",
+              borderRadius: 4
+            }}
+          >
+            {uploading ? "Mengunggah..." : "Tambah Gambar Hero"}
+          </label>
         </div>
-        <ImageUpload 
-          label="Hero Image" 
-          value={form.imageUrl} 
-          onChange={val => setForm({ ...form, imageUrl: val })} 
-        />
-        <button type="submit" style={{ padding: "12px 32px", background: "#111", color: "#fff", border: "none", fontWeight: 600 }}>{editing ? "Update Slide" : "Add Slide"}</button>
-        {editing && <button type="button" onClick={() => { setEditing(null); setForm({ headline: "", subheadline: "", imageUrl: "" }); }} style={{ marginLeft: 16, background: "none", border: "none", color: "#888", fontWeight: 600 }}>Cancel</button>}
-      </form>
+      </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 24 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 24 }}>
         {slides.map(s => (
-          <div key={s.id} style={{ background: "#fff", border: `1px solid ${TOKENS.border}`, borderRadius: 8, overflow: "hidden" }}>
-            <img src={s.imageUrl} style={{ width: "100%", height: 180, objectFit: "cover" }} />
-            <div style={{ padding: 24 }}>
-              <div style={{ fontWeight: 700, marginBottom: 8 }}>{s.headline}</div>
-              <div style={{ fontSize: 13, color: "#888", marginBottom: 24 }}>{s.subheadline}</div>
-              <div style={{ display: "flex", gap: 16 }}>
-                <button onClick={() => { setEditing(s.id); setForm(s); }} style={{ background: "none", border: "none", color: "#111", fontWeight: 600, fontSize: 12, textTransform: "uppercase" }}>Edit</button>
-                <button onClick={() => handleDelete(s.id)} style={{ background: "none", border: "none", color: "red", fontWeight: 600, fontSize: 12, textTransform: "uppercase" }}>Delete</button>
-              </div>
+          <div key={s.id} style={{ background: "#fff", border: `1px solid ${TOKENS.border}`, borderRadius: 8, overflow: "hidden", position: "relative" }}>
+            <img src={s.imageUrl} style={{ width: "100%", height: 200, objectFit: "cover" }} />
+            <div style={{ padding: 16, display: "flex", justifyContent: "flex-end" }}>
+              <button onClick={() => handleDelete(s.id)} style={{ background: "none", border: "none", color: "red", fontWeight: 600, fontSize: 12, textTransform: "uppercase", cursor: "pointer" }}>Hapus</button>
             </div>
           </div>
         ))}
       </div>
+      {slides.length === 0 && (
+        <div style={{ padding: 80, textAlign: "center", background: "#fff", border: `1px dashed ${TOKENS.border}`, borderRadius: 8, color: "#888" }}>
+          Belum ada gambar hero. Silakan unggah gambar.
+        </div>
+      )}
     </div>
   );
 }
@@ -1432,82 +1453,239 @@ function ContentManager({ type, items }) {
 }
 
 function ContentForm({ type, initialData, onClose }) {
-  const [form, setForm] = useState(initialData || {
-    title: "", name: "", label: "",
-    category: "", cat: "", type: "",
-    date: "", price: "", year: "",
-    imageUrl: "", img: "", excerpt: "", content: "", description: "", desc: "",
-    featured: false,
-    gallery: []
-  });
+  // Normalize initialData so form always uses canonical field names
+  const normalize = (data: any) => {
+    if (!data) return null;
+    if (type === "works") {
+      return {
+        label: data.label || data.title || "",
+        category: data.category || data.cat || data.type || "",
+        year: data.year || data.date || "",
+        bg: data.bg || data.imageUrl || data.img || "",
+        description: data.description || data.desc || data.content || "",
+        gallery: data.gallery || [],
+      };
+    }
+    if (type === "products") {
+      return {
+        name: data.name || "",
+        cat: data.cat || data.category || data.type || "",
+        price: data.price || data.date || data.year || "",
+        img: data.img || data.imageUrl || data.bg || "",
+        description: data.description || data.desc || data.content || "",
+        specs: data.specs || [],
+      };
+    }
+    if (type === "logs") {
+      return {
+        title: data.title || data.label || "",
+        cat: data.cat || data.category || data.type || "",
+        date: data.date || data.year || "",
+        img: data.img || data.imageUrl || data.bg || "",
+        excerpt: data.excerpt || "",
+        content: data.content || data.description || data.desc || "",
+        featured: data.featured || false,
+      };
+    }
+    return data;
+  };
+
+  const [form, setForm] = useState(normalize(initialData) || (() => {
+    if (type === "works") return { label: "", category: "", year: "", bg: "", description: "", gallery: [] };
+    if (type === "products") return { name: "", cat: "", price: "", img: "", description: "", specs: [] };
+    if (type === "logs") return { title: "", cat: "", date: "", img: "", excerpt: "", content: "", featured: false };
+    return {};
+  }));
+
+  const [saving, setSaving] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSaving(true);
     try {
+      // Build clean payload with ONLY canonical fields per type
+      let payload: any = {};
+      if (type === "works") {
+        payload = {
+          label: form.label,
+          category: form.category,
+          year: form.year,
+          bg: form.bg,
+          description: form.description,
+          gallery: form.gallery || [],
+          createdAt: initialData?.createdAt || new Date().toISOString(),
+        };
+      } else if (type === "products") {
+        payload = {
+          name: form.name,
+          cat: form.cat,
+          price: form.price,
+          img: form.img,
+          description: form.description,
+          specs: form.specs || [],
+          createdAt: initialData?.createdAt || new Date().toISOString(),
+        };
+      } else if (type === "logs") {
+        payload = {
+          title: form.title,
+          cat: form.cat,
+          date: form.date,
+          img: form.img,
+          excerpt: form.excerpt,
+          content: form.content,
+          featured: form.featured || false,
+          createdAt: initialData?.createdAt || new Date().toISOString(),
+        };
+      }
+
       if (initialData?.id) {
-        await setDoc(doc(db, type, initialData.id), form);
+        await setDoc(doc(db, type, initialData.id), payload);
       } else {
-        await addDoc(collection(db, type), { ...form, id: Date.now().toString() });
+        await addDoc(collection(db, type), payload);
       }
       onClose();
     } catch (err) {
       handleFirestoreError(err, OperationType.WRITE, type);
+    } finally {
+      setSaving(false);
     }
   };
+
+  const inputStyle = { width: "100%", padding: 12, border: `1px solid ${TOKENS.border}`, fontFamily: "'Inter', sans-serif", fontSize: 13, borderRadius: 4 };
+  const labelStyle = { display: "block", fontSize: 11, fontWeight: 600, marginBottom: 8, textTransform: "uppercase" as const, color: TOKENS.textMuted };
 
   return (
     <form onSubmit={handleSubmit}>
       <h3 style={{ fontSize: 20, fontWeight: 700, marginBottom: 32 }}>{initialData ? "Edit" : "Add"} {type}</h3>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24, marginBottom: 24 }}>
-        {(type === "works" || type === "logs") && (
-          <div>
-            <label style={{ display: "block", fontSize: 11, fontWeight: 600, marginBottom: 8, textTransform: "uppercase" }}>Title</label>
-            <input value={form.title || form.label} onChange={e => setForm({ ...form, title: e.target.value, label: e.target.value })} style={{ width: "100%", padding: 12, border: `1px solid ${TOKENS.border}` }} required />
+
+      {/* === WORKS FORM === */}
+      {type === "works" && (
+        <>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24, marginBottom: 24 }}>
+            <div>
+              <label style={labelStyle}>Judul Proyek</label>
+              <input value={form.label} onChange={e => setForm({ ...form, label: e.target.value })} style={inputStyle} required placeholder="Contoh: Rumah Modern BSD" />
+            </div>
+            <div>
+              <label style={labelStyle}>Kategori</label>
+              <select value={form.category} onChange={e => setForm({ ...form, category: e.target.value })} style={inputStyle} required>
+                <option value="">Pilih kategori...</option>
+                <option value="Interior & Eksterior">Interior & Eksterior</option>
+                <option value="Konstruksi">Konstruksi</option>
+                <option value="Furnitur">Furnitur</option>
+              </select>
+            </div>
           </div>
-        )}
-        {type === "products" && (
-          <div>
-            <label style={{ display: "block", fontSize: 11, fontWeight: 600, marginBottom: 8, textTransform: "uppercase" }}>Name</label>
-            <input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} style={{ width: "100%", padding: 12, border: `1px solid ${TOKENS.border}` }} required />
+          <div style={{ marginBottom: 24 }}>
+            <label style={labelStyle}>Tahun</label>
+            <input value={form.year} onChange={e => setForm({ ...form, year: e.target.value })} style={inputStyle} required placeholder="Contoh: 2024" />
           </div>
-        )}
-        <div>
-          <label style={{ display: "block", fontSize: 11, fontWeight: 600, marginBottom: 8, textTransform: "uppercase" }}>Category</label>
-          <input value={form.category || form.cat || form.type} onChange={e => setForm({ ...form, category: e.target.value, cat: e.target.value, type: e.target.value })} style={{ width: "100%", padding: 12, border: `1px solid ${TOKENS.border}` }} required />
-        </div>
-      </div>
+          <ImageUpload label="Foto Utama Proyek" value={form.bg} onChange={val => setForm({ ...form, bg: val })} />
+          <div style={{ marginBottom: 24 }}>
+            <label style={labelStyle}>Deskripsi Proyek</label>
+            <textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} style={{ ...inputStyle, height: 150 }} placeholder="Ceritakan detail proyek ini..." />
+          </div>
+          {/* Gallery */}
+          <div style={{ marginBottom: 32 }}>
+            <label style={labelStyle}>Galeri Foto</label>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(120px, 1fr))", gap: 16, marginBottom: 16 }}>
+              {(form.gallery || []).map((img, idx) => (
+                <div key={idx} style={{ position: "relative", aspectRatio: "1/1", border: `1px solid ${TOKENS.border}`, borderRadius: 4, overflow: "hidden" }}>
+                  <img src={img} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  <button type="button" onClick={() => setForm({ ...form, gallery: form.gallery.filter((_, i) => i !== idx) })}
+                    style={{ position: "absolute", top: 4, right: 4, background: "rgba(255,0,0,0.8)", color: "#fff", border: "none", borderRadius: "50%", width: 20, height: 20, fontSize: 10, cursor: "pointer" }}>✕</button>
+                </div>
+              ))}
+              <label style={{ aspectRatio: "1/1", border: `1px dashed ${TOKENS.border}`, borderRadius: 4, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", cursor: "pointer", background: TOKENS.surface }}>
+                <input type="file" multiple accept="image/*" style={{ display: "none" }}
+                  onChange={async (e: React.ChangeEvent<HTMLInputElement>) => {
+                    const files = Array.from(e.target.files || []) as File[];
+                    const newGallery = [...(form.gallery || [])];
+                    for (const file of files) {
+                      const storageRef = ref(storage, `gallery/${Date.now()}_${file.name}`);
+                      const snapshot = await uploadBytes(storageRef, file);
+                      const url = await getDownloadURL(snapshot.ref);
+                      newGallery.push(url);
+                    }
+                    setForm({ ...form, gallery: newGallery });
+                    if (e.target) e.target.value = "";
+                  }} />
+                <span style={{ fontSize: 20, color: "#888" }}>+</span>
+                <span style={{ fontSize: 10, color: "#888" }}>Upload</span>
+              </label>
+            </div>
+          </div>
+        </>
+      )}
 
-      <div style={{ marginBottom: 24 }}>
-        <label style={{ display: "block", fontSize: 11, fontWeight: 600, marginBottom: 8, textTransform: "uppercase" }}>Date / Price / Year</label>
-        <input value={form.date || form.price || form.year} onChange={e => setForm({ ...form, date: e.target.value, price: e.target.value, year: e.target.value })} style={{ width: "100%", padding: 12, border: `1px solid ${TOKENS.border}` }} required />
-      </div>
+      {/* === PRODUCTS FORM === */}
+      {type === "products" && (
+        <>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24, marginBottom: 24 }}>
+            <div>
+              <label style={labelStyle}>Nama Produk</label>
+              <input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} style={inputStyle} required placeholder="Contoh: Kursi Minimalis Oslo" />
+            </div>
+            <div>
+              <label style={labelStyle}>Kategori</label>
+              <select value={form.cat} onChange={e => setForm({ ...form, cat: e.target.value })} style={inputStyle} required>
+                <option value="">Pilih kategori...</option>
+                <option value="Interior & Eksterior">Interior & Eksterior</option>
+                <option value="Konstruksi">Konstruksi</option>
+                <option value="Furnitur">Furnitur</option>
+              </select>
+            </div>
+          </div>
+          <div style={{ marginBottom: 24 }}>
+            <label style={labelStyle}>Harga</label>
+            <input value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} style={inputStyle} required placeholder="Contoh: Rp 4.500.000" />
+          </div>
+          <ImageUpload label="Foto Produk" value={form.img} onChange={val => setForm({ ...form, img: val })} />
+          <div style={{ marginBottom: 24 }}>
+            <label style={labelStyle}>Deskripsi Produk</label>
+            <textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} style={{ ...inputStyle, height: 150 }} placeholder="Jelaskan spesifikasi dan keunggulan produk..." />
+          </div>
+        </>
+      )}
 
-      <ImageUpload 
-        label="Main Image" 
-        value={form.imageUrl || form.img} 
-        onChange={val => setForm({ ...form, imageUrl: val, img: val })} 
-      />
-
-      <div style={{ marginBottom: 24 }}>
-        <label style={{ display: "block", fontSize: 11, fontWeight: 600, marginBottom: 8, textTransform: "uppercase" }}>Excerpt / Short Description</label>
-        <textarea value={form.excerpt || form.description || form.desc} onChange={e => setForm({ ...form, excerpt: e.target.value, description: e.target.value, desc: e.target.value })} style={{ width: "100%", padding: 12, border: `1px solid ${TOKENS.border}`, height: 80 }} />
-      </div>
-
-      <div style={{ marginBottom: 32 }}>
-        <label style={{ display: "block", fontSize: 11, fontWeight: 600, marginBottom: 8, textTransform: "uppercase" }}>Full Content / Description</label>
-        <textarea value={form.content || form.description || form.desc} onChange={e => setForm({ ...form, content: e.target.value, description: e.target.value, desc: e.target.value })} style={{ width: "100%", padding: 12, border: `1px solid ${TOKENS.border}`, height: 200 }} />
-      </div>
-
+      {/* === LOGS FORM === */}
       {type === "logs" && (
-        <div style={{ marginBottom: 32, display: "flex", alignItems: "center", gap: 12 }}>
-          <input type="checkbox" checked={form.featured} onChange={e => setForm({ ...form, featured: e.target.checked })} id="featured" />
-          <label htmlFor="featured" style={{ fontSize: 13, fontWeight: 500 }}>Featured Post</label>
-        </div>
+        <>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24, marginBottom: 24 }}>
+            <div>
+              <label style={labelStyle}>Judul Artikel</label>
+              <input value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} style={inputStyle} required placeholder="Contoh: Tren Desain Interior 2024" />
+            </div>
+            <div>
+              <label style={labelStyle}>Kategori</label>
+              <input value={form.cat} onChange={e => setForm({ ...form, cat: e.target.value })} style={inputStyle} required placeholder="Contoh: Desain, Inspirasi, Tips" />
+            </div>
+          </div>
+          <div style={{ marginBottom: 24 }}>
+            <label style={labelStyle}>Tanggal</label>
+            <input type="date" value={form.date} onChange={e => setForm({ ...form, date: e.target.value })} style={inputStyle} required />
+          </div>
+          <ImageUpload label="Foto Artikel" value={form.img} onChange={val => setForm({ ...form, img: val })} />
+          <div style={{ marginBottom: 24 }}>
+            <label style={labelStyle}>Ringkasan (Excerpt)</label>
+            <textarea value={form.excerpt} onChange={e => setForm({ ...form, excerpt: e.target.value })} style={{ ...inputStyle, height: 80 }} placeholder="Ringkasan singkat artikel (tampil di halaman Catatan)..." />
+          </div>
+          <div style={{ marginBottom: 24 }}>
+            <label style={labelStyle}>Isi Artikel Lengkap</label>
+            <textarea value={form.content} onChange={e => setForm({ ...form, content: e.target.value })} style={{ ...inputStyle, height: 200 }} placeholder="Tulis isi lengkap artikel di sini..." />
+          </div>
+          <div style={{ marginBottom: 32, display: "flex", alignItems: "center", gap: 12 }}>
+            <input type="checkbox" checked={form.featured} onChange={e => setForm({ ...form, featured: e.target.checked })} id="featured" />
+            <label htmlFor="featured" style={{ fontSize: 13, fontWeight: 500 }}>Featured Post (tampil pertama)</label>
+          </div>
+        </>
       )}
 
       <div style={{ display: "flex", gap: 16, justifyContent: "flex-end" }}>
-        <button type="button" onClick={onClose} style={{ padding: "12px 24px", background: "none", border: "none", color: "#888", fontWeight: 600 }}>Cancel</button>
-        <button type="submit" style={{ padding: "12px 32px", background: "#111", color: "#fff", border: "none", fontWeight: 600 }}>Save Changes</button>
+        <button type="button" onClick={onClose} style={{ padding: "12px 24px", background: "none", border: "none", color: "#888", fontWeight: 600, cursor: "pointer" }}>Batal</button>
+        <button type="submit" disabled={saving} style={{ padding: "12px 32px", background: saving ? "#888" : "#111", color: "#fff", border: "none", fontWeight: 600, cursor: saving ? "not-allowed" : "pointer", borderRadius: 4 }}>
+          {saving ? "Menyimpan..." : "Simpan"}
+        </button>
       </div>
     </form>
   );
@@ -1543,9 +1721,10 @@ interface FirestoreErrorInfo {
   }
 }
 
-function handleFirestoreError(error: unknown, operationType: OperationType, path: string | null) {
+function handleFirestoreError(error: unknown, operationType: OperationType, path: string | null, showAlert = true) {
+  const errMsg = error instanceof Error ? error.message : String(error);
   const errInfo: FirestoreErrorInfo = {
-    error: error instanceof Error ? error.message : String(error),
+    error: errMsg,
     authInfo: {
       userId: auth.currentUser?.uid,
       email: auth.currentUser?.email,
@@ -1563,7 +1742,14 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
     path
   }
   console.error('Firestore Error: ', JSON.stringify(errInfo));
-  throw new Error(JSON.stringify(errInfo));
+  if (showAlert) {
+    const isPermission = errMsg.toLowerCase().includes('permission') || errMsg.toLowerCase().includes('missing or insufficient');
+    if (isPermission) {
+      alert(`Akses ditolak Firebase. Pastikan Anda login sebagai admin (${ADMIN_EMAIL}) dan Firestore Rules sudah diperbarui.`);
+    } else {
+      alert(`Terjadi kesalahan: ${errMsg}`);
+    }
+  }
 }
 
 export default function App() {
@@ -1625,22 +1811,22 @@ export default function App() {
           "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1920&q=80"
         ]);
       }
-    }, (error) => handleFirestoreError(error, OperationType.LIST, "settings/hero"));
+    }, (error) => handleFirestoreError(error, OperationType.LIST, "settings/hero", false));
 
     const unsubWorks = onSnapshot(query(collection(db, "works"), orderBy("year", "desc")), (snapshot) => {
       const works = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setWorksData(works.length > 0 ? works : WORKS);
-    }, (error) => handleFirestoreError(error, OperationType.LIST, "works"));
+    }, (error) => handleFirestoreError(error, OperationType.LIST, "works", false));
 
     const unsubProducts = onSnapshot(collection(db, "products"), (snapshot) => {
       const products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setProductsData(products.length > 0 ? products : []);
-    }, (error) => handleFirestoreError(error, OperationType.LIST, "products"));
+    }, (error) => handleFirestoreError(error, OperationType.LIST, "products", false));
 
     const unsubLogs = onSnapshot(query(collection(db, "logs"), orderBy("date", "desc")), (snapshot) => {
       const logs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setLogsData(logs.length > 0 ? logs : LOGS);
-    }, (error) => handleFirestoreError(error, OperationType.LIST, "logs"));
+    }, (error) => handleFirestoreError(error, OperationType.LIST, "logs", false));
 
     return () => {
       unsubHero();

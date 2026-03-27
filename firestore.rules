@@ -8,8 +8,7 @@ service cloud.firestore {
     // Fields: headline (string), subheadline (string), imageUrl (string)
     //
     // Collection: works
-    // Fields: title (string), category (string), year (string), description (string), imageUrl (string), gallery (list), createdAt (timestamp)
-    //
+    // Fields: title (string), category (string), year (string), description (string), imageUrl (string), gallery (list), createdAt (timestamp)    //
     // Collection: products
     // Fields: name (string), category (string), price (string), description (string), imageUrl (string), specs (list), createdAt (timestamp)
     //
