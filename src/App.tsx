@@ -18,7 +18,7 @@ import {
   getDocs,
   getDocFromServer
 } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { ref as _ref, uploadBytes as _uploadBytes, getDownloadURL as _getDownloadURL } from "firebase/storage";
 import { auth, db, storage } from "./firebase";
 
 /**
@@ -1250,87 +1250,70 @@ function AdminPanel({ user, isAuthReady, heroData, worksData, productsData, logs
 }
 
 function ImageUpload({ label, value, onChange }) {
-  const [uploading, setUploading] = useState(false);
+  const [inputVal, setInputVal] = useState(value || "");
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  useEffect(() => { setInputVal(value || ""); }, [value]);
 
-    // Limit size to 2MB for better performance
-    if (file.size > 2000000) {
-      alert("Ukuran gambar terlalu besar (maksimal 2MB).");
+  const handleApply = () => {
+    const trimmed = inputVal.trim();
+    if (trimmed && !trimmed.startsWith("http")) {
+      alert("URL harus diawali dengan http:// atau https://");
       return;
     }
-
-    setUploading(true);
-    try {
-      const storageRef = ref(storage, `uploads/${Date.now()}_${file.name}`);
-      const snapshot = await uploadBytes(storageRef, file);
-      const url = await getDownloadURL(snapshot.ref);
-      onChange(url);
-    } catch (err) {
-      console.error("Upload error:", err);
-      alert("Gagal mengunggah gambar.");
-    } finally {
-      setUploading(false);
-    }
+    onChange(trimmed);
   };
 
   return (
     <div style={{ marginBottom: 24 }}>
       <label style={{ display: "block", fontSize: 11, fontWeight: 600, marginBottom: 8, textTransform: "uppercase" }}>{label}</label>
-      <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
-        {value && (
-          <div style={{ width: 80, height: 80, borderRadius: 4, overflow: "hidden", border: `1px solid ${TOKENS.border}`, flexShrink: 0 }}>
-            <img src={value} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-          </div>
-        )}
-        <div style={{ flex: 1 }}>
-          <input 
-            type="file" 
-            accept="image/*" 
-            onChange={handleFileChange} 
-            disabled={uploading}
-            style={{ 
-              width: "100%", 
-              padding: "10px", 
-              border: `1px dashed ${TOKENS.border}`, 
-              fontSize: 12,
-              cursor: uploading ? "not-allowed" : "pointer"
-            }} 
-          />
-          <div style={{ fontSize: 10, color: "#888", marginTop: 4 }}>
-            {uploading ? "Mengunggah..." : "Pilih file gambar (JPG, PNG, WEBP)"}
-          </div>
+      {value && (
+        <div style={{ marginBottom: 12, position: "relative", display: "inline-block" }}>
+          <img src={value} alt="preview" style={{ width: 120, height: 80, objectFit: "cover", borderRadius: 4, border: `1px solid ${TOKENS.border}`, display: "block" }}
+            onError={e => { (e.target as HTMLImageElement).style.display = "none"; }} />
+          <button type="button" onClick={() => { onChange(""); setInputVal(""); }}
+            style={{ position: "absolute", top: -8, right: -8, width: 20, height: 20, borderRadius: "50%", background: "#ef4444", color: "#fff", border: "none", fontSize: 11, cursor: "pointer" }}>✕</button>
         </div>
+      )}
+      <div style={{ display: "flex", gap: 8 }}>
+        <input type="url" value={inputVal}
+          onChange={e => setInputVal(e.target.value)}
+          onBlur={handleApply}
+          onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); handleApply(); } }}
+          placeholder="Paste URL gambar (https://...)"
+          style={{ flex: 1, padding: "10px 12px", border: `1px solid ${TOKENS.border}`, borderRadius: 4, fontSize: 13, fontFamily: "'Inter', sans-serif" }}
+        />
+        <button type="button" onClick={handleApply}
+          style={{ padding: "10px 16px", background: "#111", color: "#fff", border: "none", borderRadius: 4, fontSize: 12, fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap" }}>
+          Terapkan
+        </button>
+      </div>
+      <div style={{ fontSize: 11, color: "#888", marginTop: 6 }}>
+        💡 Upload ke <a href="https://imgbb.com" target="_blank" rel="noreferrer" style={{ color: "#111", fontWeight: 600 }}>ImgBB.com</a> (gratis), lalu paste URL-nya di sini.
       </div>
     </div>
   );
 }
 
 function HeroManager({ slides }) {
-  const [uploading, setUploading] = useState(false);
+  const [newUrl, setNewUrl] = useState("");
+  const [saving, setSaving] = useState(false);
 
-  const handleUploadImages = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []) as File[];
-    if (files.length === 0) return;
-
-    setUploading(true);
+  const handleAddUrl = async () => {
+    const trimmed = newUrl.trim();
+    if (!trimmed) return;
+    if (!trimmed.startsWith("http")) {
+      alert("URL harus diawali dengan http:// atau https://");
+      return;
+    }
+    setSaving(true);
     try {
-      const newSlides = [...slides];
-      for (const file of files) {
-        const storageRef = ref(storage, `hero/${Date.now()}_${file.name}`);
-        const snapshot = await uploadBytes(storageRef, file);
-        const url = await getDownloadURL(snapshot.ref);
-        newSlides.push({ id: Date.now() + Math.random(), imageUrl: url });
-      }
+      const newSlides = [...slides, { id: Date.now() + Math.random(), imageUrl: trimmed }];
       await setDoc(doc(db, "settings", "hero"), { slides: newSlides });
+      setNewUrl("");
     } catch (err) {
-      console.error("Hero upload error:", err);
-      alert("Gagal mengunggah gambar hero.");
+      handleFirestoreError(err, OperationType.WRITE, "settings/hero");
     } finally {
-      setUploading(false);
-      if (e.target) e.target.value = ""; // Reset input
+      setSaving(false);
     }
   };
 
@@ -1347,46 +1330,47 @@ function HeroManager({ slides }) {
     <div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 32 }}>
         <h2 style={{ fontSize: 24, fontWeight: 700 }}>Manage Hero Slides</h2>
-        <div style={{ position: "relative" }}>
-          <input 
-            type="file" 
-            multiple 
-            accept="image/*" 
-            onChange={handleUploadImages} 
-            disabled={uploading}
-            id="hero-upload"
-            style={{ display: "none" }}
+      </div>
+
+      {/* Add URL form */}
+      <div style={{ background: "#f9f9f9", border: `1px solid ${TOKENS.border}`, borderRadius: 8, padding: 24, marginBottom: 32 }}>
+        <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 12 }}>Tambah Slide Baru</div>
+        <div style={{ display: "flex", gap: 8 }}>
+          <input
+            type="url"
+            value={newUrl}
+            onChange={e => setNewUrl(e.target.value)}
+            onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); handleAddUrl(); } }}
+            placeholder="Paste URL gambar hero (https://...)"
+            style={{ flex: 1, padding: "10px 14px", border: `1px solid ${TOKENS.border}`, borderRadius: 4, fontSize: 13, fontFamily: "'Inter', sans-serif" }}
           />
-          <label 
-            htmlFor="hero-upload"
-            style={{ 
-              padding: "12px 24px", 
-              background: uploading ? "#888" : "#111", 
-              color: "#fff", 
-              border: "none", 
-              fontWeight: 600, 
-              cursor: uploading ? "not-allowed" : "pointer",
-              borderRadius: 4
-            }}
-          >
-            {uploading ? "Mengunggah..." : "Tambah Gambar Hero"}
-          </label>
+          <button onClick={handleAddUrl} disabled={saving || !newUrl.trim()}
+            style={{ padding: "10px 20px", background: saving ? "#888" : "#111", color: "#fff", border: "none", borderRadius: 4, fontWeight: 600, fontSize: 13, cursor: saving ? "not-allowed" : "pointer", whiteSpace: "nowrap" }}>
+            {saving ? "Menyimpan..." : "+ Tambah"}
+          </button>
+        </div>
+        <div style={{ fontSize: 11, color: "#888", marginTop: 8 }}>
+          💡 Upload foto ke <a href="https://imgbb.com" target="_blank" rel="noreferrer" style={{ color: "#111", fontWeight: 600 }}>ImgBB.com</a> (gratis), klik kanan gambar → "Copy image address", lalu paste di sini.
         </div>
       </div>
 
+      {/* Slides grid */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 24 }}>
         {slides.map(s => (
-          <div key={s.id} style={{ background: "#fff", border: `1px solid ${TOKENS.border}`, borderRadius: 8, overflow: "hidden", position: "relative" }}>
-            <img src={s.imageUrl} style={{ width: "100%", height: 200, objectFit: "cover" }} />
-            <div style={{ padding: 16, display: "flex", justifyContent: "flex-end" }}>
-              <button onClick={() => handleDelete(s.id)} style={{ background: "none", border: "none", color: "red", fontWeight: 600, fontSize: 12, textTransform: "uppercase", cursor: "pointer" }}>Hapus</button>
+          <div key={s.id} style={{ background: "#fff", border: `1px solid ${TOKENS.border}`, borderRadius: 8, overflow: "hidden" }}>
+            <img src={s.imageUrl} alt="slide" style={{ width: "100%", height: 200, objectFit: "cover", display: "block" }}
+              onError={e => { (e.target as HTMLImageElement).src = "https://placehold.co/400x200?text=Gambar+tidak+ditemukan"; }} />
+            <div style={{ padding: 12, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <span style={{ fontSize: 11, color: "#888", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 200 }}>{s.imageUrl}</span>
+              <button onClick={() => handleDelete(s.id)} style={{ background: "none", border: "none", color: "#ef4444", fontWeight: 600, fontSize: 12, cursor: "pointer", flexShrink: 0 }}>Hapus</button>
             </div>
           </div>
         ))}
       </div>
+
       {slides.length === 0 && (
         <div style={{ padding: 80, textAlign: "center", background: "#fff", border: `1px dashed ${TOKENS.border}`, borderRadius: 8, color: "#888" }}>
-          Belum ada gambar hero. Silakan unggah gambar.
+          Belum ada slide hero. Tambahkan URL gambar di atas.
         </div>
       )}
     </div>
@@ -1447,6 +1431,34 @@ function ContentManager({ type, items }) {
             ))}
           </tbody>
         </table>
+      </div>
+    </div>
+  );
+}
+
+function GalleryUrlInput({ onAdd }) {
+  const [url, setUrl] = useState("");
+  const handle = () => {
+    const t = url.trim();
+    if (!t) return;
+    if (!t.startsWith("http")) { alert("URL harus diawali http:// atau https://"); return; }
+    onAdd(t);
+    setUrl("");
+  };
+  return (
+    <div>
+      <div style={{ display: "flex", gap: 8 }}>
+        <input type="url" value={url} onChange={e => setUrl(e.target.value)}
+          onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); handle(); } }}
+          placeholder="Paste URL foto galeri (https://...)"
+          style={{ flex: 1, padding: "8px 12px", border: `1px solid ${TOKENS.border}`, borderRadius: 4, fontSize: 13, fontFamily: "'Inter', sans-serif" }} />
+        <button type="button" onClick={handle}
+          style={{ padding: "8px 14px", background: "#111", color: "#fff", border: "none", borderRadius: 4, fontSize: 12, fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap" }}>
+          + Tambah
+        </button>
+      </div>
+      <div style={{ fontSize: 11, color: "#888", marginTop: 6 }}>
+        💡 Upload ke <a href="https://imgbb.com" target="_blank" rel="noreferrer" style={{ color: "#111", fontWeight: 600 }}>ImgBB.com</a>, paste URL di sini, klik Tambah — bisa berulang untuk beberapa foto.
       </div>
     </div>
   );
@@ -1588,32 +1600,21 @@ function ContentForm({ type, initialData, onClose }) {
           {/* Gallery */}
           <div style={{ marginBottom: 32 }}>
             <label style={labelStyle}>Galeri Foto</label>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(120px, 1fr))", gap: 16, marginBottom: 16 }}>
-              {(form.gallery || []).map((img, idx) => (
-                <div key={idx} style={{ position: "relative", aspectRatio: "1/1", border: `1px solid ${TOKENS.border}`, borderRadius: 4, overflow: "hidden" }}>
-                  <img src={img} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                  <button type="button" onClick={() => setForm({ ...form, gallery: form.gallery.filter((_, i) => i !== idx) })}
-                    style={{ position: "absolute", top: 4, right: 4, background: "rgba(255,0,0,0.8)", color: "#fff", border: "none", borderRadius: "50%", width: 20, height: 20, fontSize: 10, cursor: "pointer" }}>✕</button>
-                </div>
-              ))}
-              <label style={{ aspectRatio: "1/1", border: `1px dashed ${TOKENS.border}`, borderRadius: 4, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", cursor: "pointer", background: TOKENS.surface }}>
-                <input type="file" multiple accept="image/*" style={{ display: "none" }}
-                  onChange={async (e: React.ChangeEvent<HTMLInputElement>) => {
-                    const files = Array.from(e.target.files || []) as File[];
-                    const newGallery = [...(form.gallery || [])];
-                    for (const file of files) {
-                      const storageRef = ref(storage, `gallery/${Date.now()}_${file.name}`);
-                      const snapshot = await uploadBytes(storageRef, file);
-                      const url = await getDownloadURL(snapshot.ref);
-                      newGallery.push(url);
-                    }
-                    setForm({ ...form, gallery: newGallery });
-                    if (e.target) e.target.value = "";
-                  }} />
-                <span style={{ fontSize: 20, color: "#888" }}>+</span>
-                <span style={{ fontSize: 10, color: "#888" }}>Upload</span>
-              </label>
-            </div>
+            {/* Existing gallery items */}
+            {(form.gallery || []).length > 0 && (
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(100px, 1fr))", gap: 12, marginBottom: 16 }}>
+                {(form.gallery || []).map((img, idx) => (
+                  <div key={idx} style={{ position: "relative", aspectRatio: "1/1", border: `1px solid ${TOKENS.border}`, borderRadius: 4, overflow: "hidden" }}>
+                    <img src={img} style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                      onError={e => { (e.target as HTMLImageElement).src = "https://placehold.co/100?text=Error"; }} />
+                    <button type="button" onClick={() => setForm({ ...form, gallery: form.gallery.filter((_, i) => i !== idx) })}
+                      style={{ position: "absolute", top: 4, right: 4, background: "rgba(239,68,68,0.9)", color: "#fff", border: "none", borderRadius: "50%", width: 20, height: 20, fontSize: 10, cursor: "pointer" }}>✕</button>
+                  </div>
+                ))}
+              </div>
+            )}
+            {/* Add gallery URL */}
+            <GalleryUrlInput onAdd={(url) => setForm({ ...form, gallery: [...(form.gallery || []), url] })} />
           </div>
         </>
       )}
